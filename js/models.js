@@ -75,6 +75,8 @@ class StoryList {
 
   async addStory( /* user, newStory */) {
     // UNIMPLEMENTED: complete this function!
+
+    // creating the token from the user login info and response from the data being pulled from the API
     const token = user.loginToken;
     const response = await axios ({
       method: "POST",
