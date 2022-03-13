@@ -19,12 +19,15 @@ async function getAndShowStoriesOnStart() {
  * Returns the markup for the story.
  */
 
-function generateStoryMarkup(story) {
+function generateStoryMarkup(story, showDeleteBtn = false) {
   // console.debug("generateStoryMarkup", story);
-
+  const showStar = Boolean(currentUser)
   const hostName = story.getHostName();
+
   return $(`
       <li id="${story.storyId}">
+      ${showDeleteBtn ? getDeleteBtnHTML() : ""}
+      ${showStar ? getStarHTML(story, currentUser) : ""}
         <a href="${story.url}" target="a_blank" class="story-link">
           ${story.title}
         </a>
@@ -50,6 +53,36 @@ function putStoriesOnPage() {
 
   $allStoriesList.show();
 }
+
+function getStarHTML(story, user) {
+  const isFavorite = user.isFavorite(story);
+  const starType = isFavorite ? "fas" : "far";
+  return `
+      <span class="star">
+        <i class="${starType} fa-star"></i>
+      </span>`;
+}
+async function toggleStoryFavorite(evt) {
+  console.debug("toggleStoryFavorite");
+
+  const $tgt = $(evt.target);
+  const $closestLi = $tgt.closest("li");
+  const storyId = $closestLi.attr("id");
+  const story = storyList.stories.find(s => s.storyId === storyId);
+
+  // see if the item is already favorited (checking by presence of star)
+  if ($tgt.hasClass("fas")) {
+    // currently a favorite: remove from user's fav list and change star
+    await currentUser.removeFavorite(story);
+    $tgt.closest("i").toggleClass("fas far");
+  } else {
+    // currently not a favorite: do the opposite
+    await currentUser.addFavorite(story);
+    $tgt.closest("i").toggleClass("fas far");
+  }
+}
+
+$allStoriesList.on("click", ".star", toggleStoryFavorite);
 
 // submitNewStory
 // console.log("submitNewStory")

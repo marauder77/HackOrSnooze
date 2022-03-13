@@ -243,5 +243,8 @@ class User {
       data: { token },
     });
   }
+  isFavorite(story) {
+    return this.favorites.some(s => (s.storyId === story.storyId));
+  }
 
 }
